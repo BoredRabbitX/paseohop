@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUSD Terminal | Westend Asset-Hub</title>
+    <title>HOP Terminal | Paseo Asset-Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -33,15 +33,16 @@
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<div class="f-left">BETA 0.0.1</div>
+<div class="f-left">BETA 0.0.2</div>
 <div class="f-right">POWERED BY POLKADOT</div>
 
 <div class="container">
-    <h1>PUSD</h1>
-<div class="author-note">100% imitation, 0% collateral, 100% test.</div>
-<div class="tagline">100% testnet. 0% real money. <br>Don't quit your day job yet.</div>
+    <h1>HOP</h1>
+    <div class="author-note">100% imitation, 0% collateral, 100% test.</div>
+    <div class="tagline">100% testnet. 0% real money. <br>Don't quit your day job yet.</div>
+    
     <div id="step-setup">
-        <button class="btn" onclick="addNetwork()">Configure Westend Network</button>
+        <button class="btn" onclick="addNetwork()">Configure Paseo Network</button>
         <div class="btn-hint">Already configured? Skip to connect:</div>
         <button class="btn btn-outline" onclick="connect()">Connect Wallet</button>
     </div>
@@ -59,13 +60,13 @@
     </div>
 
     <div id="step-claim" style="display:none;">
-        <button class="btn" id="btn-claim" onclick="claim()">Claim 1 PUSD</button>
+        <button class="btn" id="btn-claim" onclick="claim()">Claim 1 HOP</button>
         <button class="btn btn-outline" onclick="addAsset()">Add to Wallet</button>
     </div>
 
     <div id="status">Waiting for connection...</div>
     
-    <a href="https://faucet.polkadot.io/westend" target="_blank" style="color: #222; font-size: 10px; text-decoration: none; margin-top: 40px; display: block; font-weight: 700;">REQUEST WND GAS TOKENS</a>
+    <a href="https://faucet.polkadot.io/paseo" target="_blank" style="color: #222; font-size: 10px; text-decoration: none; margin-top: 40px; display: block; font-weight: 700;">REQUEST PAS GAS TOKENS</a>
 </div>
 
 <script>
@@ -109,7 +110,8 @@
     init(); animate();
     window.addEventListener('resize', init);
 
-    const ADDR = "0xdd1747d54fa8d568f9e25b5fbf08561fe6b39f41";
+    // Update with your HOP contract address on Paseo
+    const ADDR = "0xdd1747d54fa8d568f9e25b5fbf08561fe6b39f41"; 
     const ABI = ["function claimToken() external", "function lastClaim(address) view returns (uint256)"];
     const ICONS = ['⚡', '🛡️', '📡', '💎', '🌑', '🚀', '🌀', '🔑', '🌿', '🧊', '🔥', '⚙️'];
     let provider, signer, contract, sequence = [], step = 0;
@@ -119,7 +121,7 @@
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x190bc416',
+                    chainId: '0x190bc416', // 420420422 for Paseo Asset Hub
                     chainName: 'Polkadot Hub TestNet',
                     nativeCurrency: { name: 'PAS', symbol: 'PAS', decimals: 18 },
                     rpcUrls: ['https://testnet-passet-hub-eth-rpc.polkadot.io'],
@@ -145,30 +147,48 @@
     async function checkCooldown(user) {
         try {
             const last = await contract.lastClaim(user);
-            const next = (parseInt(last) + 604800);
+            const weekInSeconds = 604800;
+            const next = (parseInt(last) + weekInSeconds);
             const now = Math.floor(Date.now() / 1000);
+            
             if (now < next && parseInt(last) !== 0) {
                 showTimer(next);
-                document.getElementById('status').innerText = "On Cooldown";
+                document.getElementById('status').innerText = "Cooldown Active";
             } else {
                 document.getElementById('step-poh-trigger').style.display = 'block';
-                document.getElementById('status').innerText = "Ready to Claim";
+                document.getElementById('status').innerText = "Ready to HOP";
             }
-        } catch (e) { document.getElementById('step-poh-trigger').style.display = 'block'; }
+        } catch (e) { 
+            document.getElementById('step-poh-trigger').style.display = 'block';
+            document.getElementById('status').innerText = "Error checking cooldown";
+        }
     }
 
-    function showTimer(next) {
+    function showTimer(nextTimestamp) {
         const div = document.getElementById('timer-display');
         div.style.display = 'flex';
-        const up = () => {
-            const diff = next - Math.floor(Date.now() / 1000);
-            if (diff <= 0) return location.reload();
+        const update = () => {
+            const now = Math.floor(Date.now() / 1000);
+            const diff = nextTimestamp - now;
+            if (diff <= 0) {
+                div.style.display = 'none';
+                document.getElementById('step-poh-trigger').style.display = 'block';
+                document.getElementById('status').innerText = "Cooldown expired! Ready.";
+                return;
+            }
             const d = Math.floor(diff / 86400);
             const h = Math.floor((diff % 86400) / 3600);
             const m = Math.floor((diff % 3600) / 60);
             div.innerText = `NEXT CLAIM IN: ${d}D ${h}H ${m}M`;
         };
-        up(); setInterval(up, 60000);
+        update();
+        const timerInterval = setInterval(() => {
+            if (document.getElementById('timer-display').style.display === 'none') {
+                clearInterval(timerInterval);
+                return;
+            }
+            update();
+        }, 60000);
     }
 
     function startPoh() {
@@ -188,8 +208,12 @@
                     if(step === 4) {
                         document.getElementById('poh-box').style.display = 'none';
                         document.getElementById('step-claim').style.display = 'block';
+                        document.getElementById('status').innerText = "Humanity Confirmed";
                     }
-                } else { step = 0; startPoh(); }
+                } else { 
+                    step = 0; 
+                    startPoh(); 
+                }
             };
             grid.appendChild(c);
         });
@@ -198,21 +222,23 @@
     async function claim() {
         try {
             document.getElementById('btn-claim').disabled = true;
-            document.getElementById('status').innerText = "Broadcasting...";
-            const tx = await contract.claimToken();
-            document.getElementById('status').innerText = "Mining... ⏳";
+            document.getElementById('status').innerText = "Broadcasting Transaction...";
+            // Increased gas limit for PolkaVM/Paseo compatibility
+            const tx = await contract.claimToken({ gasLimit: 2000000 });
+            document.getElementById('status').innerText = "Mining on Paseo... ⏳";
             await tx.wait();
-            document.getElementById('status').innerText = "Success! 🎉";
+            document.getElementById('status').innerText = "HOP Success! 🎉";
             setTimeout(() => location.reload(), 3000);
         } catch (e) {
-            document.getElementById('status').innerText = "Error: Check WND Balance";
+            document.getElementById('status').innerText = "Error: Check PAS Balance";
             document.getElementById('btn-claim').disabled = false;
+            console.error(e);
         }
     }
 
     async function addAsset() {
         await window.ethereum.request({ method: 'wallet_watchAsset', params: { 
-            type: 'ERC20', options: { address: ADDR, symbol: 'PUSD', decimals: 18 } 
+            type: 'ERC20', options: { address: ADDR, symbol: 'HOP', decimals: 18 } 
         }});
     }
 </script>
