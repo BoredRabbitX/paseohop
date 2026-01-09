@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOP Terminal | Beta 0.0.2</title>
+    <title>PUSD Terminal | Westend Asset-Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -12,13 +12,19 @@
         #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
         .container { width: 100%; max-width: 400px; padding: 20px; text-align: center; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; position: relative; }
         h1 { font-family: 'Unbounded', sans-serif; font-size: 3rem; margin: 0; letter-spacing: -2px; }
-        .author-note { font-size: 0.55rem; color: #e6007a; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; opacity: 0.9; line-height: 1.4; }
+        .author-note { font-size: 0.55rem; color: #e6007a; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; opacity: 0.8; }
         .tagline { font-size: 0.75rem; color: #555; margin: 15px 0 25px 0; text-transform: uppercase; letter-spacing: 2px; }
         .btn-hint { font-size: 0.65rem; color: #444; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
         .btn { font-family: 'Inter', sans-serif; background: var(--fg); color: var(--bg); border: none; height: 60px; font-size: 0.85rem; font-weight: 700; border-radius: 4px; cursor: pointer; width: 100%; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; text-transform: uppercase; transition: 0.2s; }
         .btn:hover { background: #ccc; }
         .btn-outline { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+        .btn:disabled { opacity: 0.2; cursor: not-allowed; }
         #timer-display { height: 60px; border: 1px solid #300; color: #ff3e3e; display: none; align-items: center; justify-content: center; font-family: 'Unbounded'; font-size: 0.8rem; margin-bottom: 12px; border-radius: 4px; }
+        #poh-box { border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; display: none; background: #050505; border-radius: 4px; }
+        .poh-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+        .poh-cell { background: #000; border: 1px solid #222; padding: 12px; cursor: pointer; font-size: 1.2rem; border-radius: 4px; transition: 0.2s; }
+        .poh-cell:hover { border-color: var(--accent); }
+        .target { background: #111; padding: 10px; color: var(--accent); border: 1px dashed #333; margin-bottom: 10px; font-family: 'Unbounded'; }
         #status { margin-top: 20px; font-size: 0.65rem; color: #444; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
         .f-left { position: fixed; bottom: 20px; left: 20px; font-family: 'Unbounded'; font-size: 10px; color: #444; }
         .f-right { position: fixed; bottom: 20px; right: 20px; font-family: 'Unbounded'; font-size: 10px; color: var(--accent); }
@@ -27,54 +33,86 @@
 <body>
 
 <canvas id="bg-canvas"></canvas>
-<div class="f-left">BETA 0.0.2</div>
+<div class="f-left">BETA 0.0.1</div>
 <div class="f-right">POWERED BY POLKADOT</div>
 
 <div class="container">
-    <h1>HOP</h1>
-    <div class="author-note">HOP: Probably Unstable & Slightly Dubious.</div>
-    <div class="tagline">100% testnet. 0% real money. Don't quit your day job yet.</div>
-
+    <h1>PUSD</h1>
+<div class="author-note">100% imitation, 0% collateral, 100% test.</div>
+<div class="tagline">100% testnet. 0% real money. <br>Don't quit your day job yet.</div>
     <div id="step-setup">
-        <button class="btn" onclick="addNetwork()">1. Configure Paseo Network</button>
+        <button class="btn" onclick="addNetwork()">Configure Westend Network</button>
         <div class="btn-hint">Already configured? Skip to connect:</div>
-        <button class="btn btn-outline" onclick="connect()">2. Connect Wallet</button>
+        <button class="btn btn-outline" onclick="connect()">Connect Wallet</button>
     </div>
 
     <div id="timer-display"></div>
 
+    <div id="step-poh-trigger" style="display:none;">
+        <button class="btn" onclick="startPoh()">Proof of Humanity</button>
+    </div>
+
+    <div id="poh-box">
+        <div style="font-size: 10px; color: #444; margin-bottom: 10px;">CLICK IN SEQUENCE</div>
+        <div class="target" id="poh-display">----</div>
+        <div class="poh-grid" id="poh-grid"></div>
+    </div>
+
     <div id="step-claim" style="display:none;">
-        <button class="btn" id="btn-claim" onclick="claim()">Claim 1 HOP</button>
+        <button class="btn" id="btn-claim" onclick="claim()">Claim 1 PUSD</button>
         <button class="btn btn-outline" onclick="addAsset()">Add to Wallet</button>
     </div>
 
     <div id="status">Waiting for connection...</div>
     
-    <a href="https://faucet.polkadot.io/paseo" target="_blank" style="color: #222; font-size: 10px; text-decoration: none; margin-top: 40px; display: block; font-weight: 700;">REQUEST PAS GAS TOKENS</a>
+    <a href="https://faucet.polkadot.io/westend" target="_blank" style="color: #222; font-size: 10px; text-decoration: none; margin-top: 40px; display: block; font-weight: 700;">REQUEST WND GAS TOKENS</a>
 </div>
 
 <script>
-    const ADDR = "INSERISCI_INDIRIZZO_QUI";
-    const ABI = ["function claimToken() external", "function lastClaim(address) view returns (uint256)"];
-
-    // Background logic
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let dots = [];
     const mouse = { x: null, y: null };
     window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+
     function init() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        dots = []; for (let i = 0; i < 100; i++) dots.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 + 1, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        dots = [];
+        for (let i = 0; i < 100; i++) {
+            dots.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 1,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5
+            });
+        }
     }
+
     function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        dots.forEach(d => { d.x += d.vx; d.y += d.vy; if (d.x < 0 || d.x > canvas.width) d.vx *= -1; if (d.y < 0 || d.y > canvas.height) d.vy *= -1; let dist = Math.hypot(mouse.x - d.x, mouse.y - d.y); if (dist < 100) { d.x -= (mouse.x - d.x) * 0.02; d.y -= (mouse.y - d.y) * 0.02; } ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.beginPath(); ctx.arc(d.x, d.y, d.size, 0, Math.PI*2); ctx.fill(); });
+        dots.forEach(d => {
+            d.x += d.vx; d.y += d.vy;
+            if (d.x < 0 || d.x > canvas.width) d.vx *= -1;
+            if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+            let dist = Math.hypot(mouse.x - d.x, mouse.y - d.y);
+            if (dist < 100) {
+                d.x -= (mouse.x - d.x) * 0.02;
+                d.y -= (mouse.y - d.y) * 0.02;
+            }
+            ctx.fillStyle = "rgba(255,255,255,0.4)";
+            ctx.beginPath(); ctx.arc(d.x, d.y, d.size, 0, Math.PI*2); ctx.fill();
+        });
         requestAnimationFrame(animate);
     }
-    init(); animate(); window.addEventListener('resize', init);
+    init(); animate();
+    window.addEventListener('resize', init);
 
-    let signer, contract;
+    const ADDR = "0xdd1747d54fa8d568f9e25b5fbf08561fe6b39f41";
+    const ABI = ["function claimToken() external", "function lastClaim(address) view returns (uint256)"];
+    const ICONS = ['⚡', '🛡️', '📡', '💎', '🌑', '🚀', '🌀', '🔑', '🌿', '🧊', '🔥', '⚙️'];
+    let provider, signer, contract, sequence = [], step = 0;
 
     async function addNetwork() {
         try {
@@ -92,51 +130,89 @@
     }
 
     async function connect() {
-        if (!window.ethereum) return;
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        contract = new ethers.Contract(ADDR, ABI, signer);
-        document.getElementById('step-setup').style.display = 'none';
-        checkStatus();
+        if (!window.ethereum) return alert("MetaMask not detected");
+        try {
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = provider.getSigner();
+            contract = new ethers.Contract(ADDR, ABI, signer);
+            const userAddr = await signer.getAddress();
+            document.getElementById('step-setup').style.display = 'none';
+            checkCooldown(userAddr);
+        } catch (e) { document.getElementById('status').innerText = "Connection Error"; }
     }
 
-    async function checkStatus() {
+    async function checkCooldown(user) {
         try {
-            const addr = await signer.getAddress();
-            const last = await contract.lastClaim(addr);
+            const last = await contract.lastClaim(user);
             const next = (parseInt(last) + 604800);
             const now = Math.floor(Date.now() / 1000);
             if (now < next && parseInt(last) !== 0) {
-                const div = document.getElementById('timer-display');
-                div.style.display = 'flex';
-                div.innerText = `NEXT CLAIM IN: ${Math.ceil((next - now) / 3600)}H`;
-                document.getElementById('status').innerText = "Cooldown Active";
+                showTimer(next);
+                document.getElementById('status').innerText = "On Cooldown";
             } else {
-                document.getElementById('step-claim').style.display = 'block';
-                document.getElementById('status').innerText = "Ready to HOP";
+                document.getElementById('step-poh-trigger').style.display = 'block';
+                document.getElementById('status').innerText = "Ready to Claim";
             }
-        } catch (e) { document.getElementById('step-claim').style.display = 'block'; }
+        } catch (e) { document.getElementById('step-poh-trigger').style.display = 'block'; }
+    }
+
+    function showTimer(next) {
+        const div = document.getElementById('timer-display');
+        div.style.display = 'flex';
+        const up = () => {
+            const diff = next - Math.floor(Date.now() / 1000);
+            if (diff <= 0) return location.reload();
+            const d = Math.floor(diff / 86400);
+            const h = Math.floor((diff % 86400) / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            div.innerText = `NEXT CLAIM IN: ${d}D ${h}H ${m}M`;
+        };
+        up(); setInterval(up, 60000);
+    }
+
+    function startPoh() {
+        document.getElementById('step-poh-trigger').style.display = 'none';
+        document.getElementById('poh-box').style.display = 'block';
+        sequence = [...ICONS].sort(() => 0.5 - Math.random()).slice(0, 4);
+        document.getElementById('poh-display').innerText = sequence.join('');
+        const grid = document.getElementById('poh-grid');
+        grid.innerHTML = '';
+        [...ICONS].sort(() => 0.5 - Math.random()).forEach(icon => {
+            const c = document.createElement('div');
+            c.className = 'poh-cell';
+            c.innerText = icon;
+            c.onclick = () => {
+                if(icon === sequence[step]) {
+                    step++; c.style.opacity = '0.1';
+                    if(step === 4) {
+                        document.getElementById('poh-box').style.display = 'none';
+                        document.getElementById('step-claim').style.display = 'block';
+                    }
+                } else { step = 0; startPoh(); }
+            };
+            grid.appendChild(c);
+        });
     }
 
     async function claim() {
         try {
             document.getElementById('btn-claim').disabled = true;
             document.getElementById('status').innerText = "Broadcasting...";
-            const tx = await contract.claimToken({ gasLimit: 2000000 });
+            const tx = await contract.claimToken();
             document.getElementById('status').innerText = "Mining... ⏳";
             await tx.wait();
-            document.getElementById('status').innerText = "HOP Success! 🎉";
+            document.getElementById('status').innerText = "Success! 🎉";
             setTimeout(() => location.reload(), 3000);
         } catch (e) {
-            document.getElementById('status').innerText = "Error (Check PAS)";
+            document.getElementById('status').innerText = "Error: Check WND Balance";
             document.getElementById('btn-claim').disabled = false;
         }
     }
 
     async function addAsset() {
         await window.ethereum.request({ method: 'wallet_watchAsset', params: { 
-            type: 'ERC20', options: { address: ADDR, symbol: 'HOP', decimals: 18 } 
+            type: 'ERC20', options: { address: ADDR, symbol: 'PUSD', decimals: 18 } 
         }});
     }
 </script>
