@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOP Terminal | Paseo Asset-Hub</title>
+    <title>HOPx Terminal | Paseo Asset-Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -37,7 +37,7 @@
 <div class="f-right">POWERED BY POLKADOT</div>
 
 <div class="container">
-    <h1>HOP</h1>
+    <h1>HOPx</h1>
     <div class="author-note">100% imitation, 0% collateral, 100% test.</div>
     <div class="tagline">100% testnet. 0% real money. <br>Don't quit your day job yet.</div>
     
@@ -60,7 +60,7 @@
     </div>
 
     <div id="step-claim" style="display:none;">
-        <button class="btn" id="btn-claim" onclick="claim()">Claim 1 HOP</button>
+        <button class="btn" id="btn-claim" onclick="claim()">Claim 1 HOPx</button>
         <button class="btn btn-outline" onclick="addAsset()">Add to Wallet</button>
     </div>
 
@@ -70,6 +70,7 @@
 </div>
 
 <script>
+    // Configurazione Background
     const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
     let dots = [];
@@ -110,7 +111,7 @@
     init(); animate();
     window.addEventListener('resize', init);
 
-    // Update with your HOP contract address on Paseo
+    // Configurazione Blockchain Paseo per HOPx
     const ADDR = "0xFf7FBB044170c855527735F08443A3e74C9E5580"; 
     const ABI = ["function claimToken() external", "function lastClaim(address) view returns (uint256)"];
     const ICONS = ['⚡', '🛡️', '📡', '💎', '🌑', '🚀', '🌀', '🔑', '🌿', '🧊', '🔥', '⚙️'];
@@ -121,7 +122,7 @@
             await window.ethereum.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
-                    chainId: '0x190bc416', // 420420422 for Paseo Asset Hub
+                    chainId: '0x190bc416', // 420420422 Paseo Asset Hub
                     chainName: 'Polkadot Hub TestNet',
                     nativeCurrency: { name: 'PAS', symbol: 'PAS', decimals: 18 },
                     rpcUrls: ['https://testnet-passet-hub-eth-rpc.polkadot.io'],
@@ -147,7 +148,7 @@
     async function checkCooldown(user) {
         try {
             const last = await contract.lastClaim(user);
-            const weekInSeconds = 604800;
+            const weekInSeconds = 604800; // 7 giorni
             const next = (parseInt(last) + weekInSeconds);
             const now = Math.floor(Date.now() / 1000);
             
@@ -156,11 +157,10 @@
                 document.getElementById('status').innerText = "Cooldown Active";
             } else {
                 document.getElementById('step-poh-trigger').style.display = 'block';
-                document.getElementById('status').innerText = "Ready to HOP";
+                document.getElementById('status').innerText = "Ready to HOPx";
             }
         } catch (e) { 
             document.getElementById('step-poh-trigger').style.display = 'block';
-            document.getElementById('status').innerText = "Error checking cooldown";
         }
     }
 
@@ -171,9 +171,7 @@
             const now = Math.floor(Date.now() / 1000);
             const diff = nextTimestamp - now;
             if (diff <= 0) {
-                div.style.display = 'none';
-                document.getElementById('step-poh-trigger').style.display = 'block';
-                document.getElementById('status').innerText = "Cooldown expired! Ready.";
+                location.reload();
                 return;
             }
             const d = Math.floor(diff / 86400);
@@ -182,13 +180,7 @@
             div.innerText = `NEXT CLAIM IN: ${d}D ${h}H ${m}M`;
         };
         update();
-        const timerInterval = setInterval(() => {
-            if (document.getElementById('timer-display').style.display === 'none') {
-                clearInterval(timerInterval);
-                return;
-            }
-            update();
-        }, 60000);
+        setInterval(update, 60000);
     }
 
     function startPoh() {
@@ -223,22 +215,20 @@
         try {
             document.getElementById('btn-claim').disabled = true;
             document.getElementById('status').innerText = "Broadcasting Transaction...";
-            // Increased gas limit for PolkaVM/Paseo compatibility
             const tx = await contract.claimToken({ gasLimit: 2000000 });
             document.getElementById('status').innerText = "Mining on Paseo... ⏳";
             await tx.wait();
-            document.getElementById('status').innerText = "HOP Success! 🎉";
+            document.getElementById('status').innerText = "HOPx Success! 🎉";
             setTimeout(() => location.reload(), 3000);
         } catch (e) {
             document.getElementById('status').innerText = "Error: Check PAS Balance";
             document.getElementById('btn-claim').disabled = false;
-            console.error(e);
         }
     }
 
     async function addAsset() {
         await window.ethereum.request({ method: 'wallet_watchAsset', params: { 
-            type: 'ERC20', options: { address: ADDR, symbol: 'HOP', decimals: 18 } 
+            type: 'ERC20', options: { address: ADDR, symbol: 'HOPx', decimals: 18 } 
         }});
     }
 </script>
